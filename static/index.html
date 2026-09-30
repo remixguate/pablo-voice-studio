@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0b12"><link rel="manifest" href="/static/manifest.json">
+<title>Pablo Voice Studio</title><link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header><div class="brand"><span class="logo">P</span><div><b>PABLO VOICE STUDIO</b><small>AI VOICE GENERATOR</small></div></div><span class="status">● GRATIS · SIN LOGIN</span></header>
+<main>
+<section class="hero"><div><p class="eyebrow">DJ • REELS • ADS • SOCIAL MEDIA</p><h1>Crea tu voz.<br><span>Hazla sonar.</span></h1><p class="sub">Genera locuciones y tags con voces naturales, ajusta el estilo y descarga tu audio.</p></div><div class="orb">PGRN</div></section>
+<section class="card">
+<label>Texto</label><textarea id="text" maxlength="5000" placeholder="Escribe aquí tu texto... Ejemplo: ¡Pablo Grn en la mezcla! Sube el volumen..."></textarea>
+<div class="grid">
+<div><label>Voz</label><select id="voice"></select></div>
+<div><label>Formato</label><select id="format"><option value="mp3">MP3</option><option value="wav">WAV</option></select></div>
+</div>
+<div class="controls">
+<div><label>Velocidad <b id="rateVal">0%</b></label><input id="rate" type="range" min="-50" max="50" value="0"></div>
+<div><label>Tono <b id="pitchVal">0</b></label><input id="pitch" type="range" min="-50" max="50" value="0"></div>
+<div><label>Volumen <b id="volumeVal">0%</b></label><input id="volume" type="range" min="-50" max="50" value="0"></div>
+</div>
+<button id="generate">GENERAR VOZ</button>
+<div id="result" class="result hidden"><audio id="audio" controls></audio><a id="download" class="download">DESCARGAR AUDIO</a></div>
+<div id="msg"></div>
+</section>
+<section class="features"><div><b>01</b><span>Voces naturales</span><small>Español MX/ES e inglés</small></div><div><b>02</b><span>Control total</span><small>Velocidad, tono y volumen</small></div><div><b>03</b><span>MP3 / WAV</span><small>Listo para tus videos y DJ IDs</small></div></section>
+</main>
+<script src="/static/app.js"></script>
+</body></html>
