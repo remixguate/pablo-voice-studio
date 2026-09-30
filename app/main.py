@@ -45,29 +45,98 @@ def voices():
 async def synthesize(req: TTSRequest):
     if req.voice not in {v["id"] for v in VOICES}:
         raise HTTPException(400, "Voz no disponible")
+
     if not req.text.strip():
         raise HTTPException(400, "Escribe un texto")
+
     if req.format not in {"mp3", "wav"}:
         raise HTTPException(400, "Formato inválido")
+
     job = uuid.uuid4().hex
     mp3 = OUTPUTS / f"{job}.mp3"
+
     rate = f"{req.rate:+d}%"
     pitch = f"{req.pitch:+d}Hz"
     volume = f"{req.volume:+d}%"
+
     try:
-        communicate = edge_tts.Communicate(req.text, req.voice, rate=rate, pitch=pitch, volume=volume)
+        print(f"TTS START - voz={req.voice}")
+        print(f"TTS RATE={rate} PITCH={pitch} VOLUME={volume}")
+        print(f"TTS OUTPUT={mp3}")
+
+        communicate = edge_tts.Communicate(
+            text=req.text,
+            voice=req.voice,
+            rate=rate,
+            pitch=pitch,
+            volume=volume
+        )
+
         await communicate.save(str(mp3))
+
+        print(f"TTS FILE EXISTS={mp3.exists()}")
+        print(f"TTS FILE SIZE={mp3.stat().st_size if mp3.exists() else 0}")
+
+        if not mp3.exists() or mp3.stat().st_size == 0:
+            raise Exception("Edge TTS no creó el archivo de audio")
+
     except Exception as e:
-        raise HTTPException(502, f"No se pudo generar la voz: {e}")
+        print("========== EDGE TTS ERROR ==========")
+        print(type(e).__name__)
+        print(str(e))
+        print("====================================")
+
+        raise HTTPException(
+            status_code=502,
+            detail=f"Error generando voz: {type(e).__name__}: {str(e)}"
+        )
+
     if req.format == "wav":
         wav = OUTPUTS / f"{job}.wav"
+
         if not shutil.which("ffmpeg"):
-            raise HTTPException(500, "FFmpeg no está instalado para exportar WAV")
-        p = subprocess.run(["ffmpeg","-y","-i",str(mp3),"-ar","44100","-ac","2",str(wav)], capture_output=True)
+            raise HTTPException(
+                500,
+                "FFmpeg no está instalado para exportar WAV"
+            )
+
+        p = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(mp3),
+                "-ar",
+                "44100",
+                "-ac",
+                "2",
+                str(wav)
+            ],
+            capture_output=True,
+            text=True
+        )
+
         if p.returncode != 0:
-            raise HTTPException(500, "Error convirtiendo a WAV")
-        return FileResponse(wav, media_type="audio/wav", filename="pablo_voice.wav")
-    return FileResponse(mp3, media_type="audio/mpeg", filename="pablo_voice.mp3")
+            print("========== FFMPEG ERROR ==========")
+            print(p.stderr)
+            print("==================================")
+
+            raise HTTPException(
+                500,
+                "Error convirtiendo a WAV"
+            )
+
+        return FileResponse(
+            wav,
+            media_type="audio/wav",
+            filename="pablo_voice.wav"
+        )
+
+    return FileResponse(
+        mp3,
+        media_type="audio/mpeg",
+        filename="pablo_voice.mp3"
+    )
 
 @app.get("/health")
 def health():
